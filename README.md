@@ -1,2 +1,1 @@
-# ecosystem-model
-ecosystem model
+# Modélisation de populations des écosystèmes
