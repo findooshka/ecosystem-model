@@ -22,9 +22,9 @@ Ce qui est déjà fait:
 * animation des iteration
 * graphes d'évolution de populations des espèces
 
-![semi-log](https://github.com/…/ecos…/blob/master/graphics/semi_log.png)
+![semi-log](https://github.com/findooshka/ecosystem-model/blob/master/graphics/semi_log.png)
 
-![graphs separes](https://github.com/…/ecos…/blob/master/graphics/separate.png)
+![graphs separes](https://github.com/findooshka/ecosystem-model/blob/master/graphics/separate.png)
 
 *(séance du 23/02/2017)*
 
