@@ -1,0 +1,4 @@
+species 0 inital satiation,species 0 satiation threshold,species 0 reproduction cooldown,species 0 reproduction threshold,species 1 inital satiation,species 1 satiation threshold,species 1 reproduction cooldown,species 1 reproduction threshold,species 2 inital satiation,species 2 satiation threshold,species 2 reproduction cooldown,species 2 reproduction threshold,result
+130,200,101,100,130,400,151,150,10,50,40,1000,True
+130,200,101,100,130,400,151,150,10,50,40,1000,True
+130,200,101,100,130,400,151,150,10,50,40,1000,True
