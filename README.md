@@ -13,12 +13,12 @@ Un individu augmente sa satiété en mangeant des individus d'autres espèces. L
 Ce qui est déjà fait:
 * class d'individu <code>Being</code>
 * class contenant tout les individus <code>Map</code> avec des fonctions pour:
-- mouvement aléatoire avec un vecteur moyenne de déplacement
-- la nourriture
-- la reproduction
-- la chasse (poursuite de proie)
-- initialisation
-- itération
+  - mouvement aléatoire avec un vecteur moyenne de déplacement
+  - la nourriture
+  - la reproduction
+  - la chasse (poursuite de proie)
+  - initialisation
+  - itération
 * animation des iteration
 * graphes d'évolution de populations des espèces
 
