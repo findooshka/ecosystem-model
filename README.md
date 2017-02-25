@@ -28,7 +28,7 @@ Ce qui est déjà fait:
 
 *(séance du 23/02/2017)*
 
-Ce que l'ont veux faire lors de cette scéance et des prochaines:
+Ce que l'ont veux faire lors de cette séance et des prochaines:
 * expérience avec differents paramètres
 * création de l évolution des paramètres
 * amélioration de la reproduction(reproduction a deux, sexe)
