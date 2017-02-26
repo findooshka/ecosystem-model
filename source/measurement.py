@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 import time
 from math import pi, cos, sin, acos, sqrt
-from map import Map
+import source.map
+import source.random_forest
 
 def get_population(beings_list):
     result = {}
@@ -52,7 +53,7 @@ def draw_population(global_map,
         subplot.set_xlim((0, iteration_number))
         subplot.plot(plots[type])
     plt.show()
-    fig = plt.figure(figsize=(12, 6))
+    fig = plt.figure(figsize=(10, 6))
     for type in inital_population:
         if not species_to_draw == None and not type in species_to_draw:
             continue
@@ -112,14 +113,14 @@ def survival_tests(file_name,
                 species_count += 1
         for simulation in range(simulations_per_test):
             species_count_list += [inital_count]
-            the_map = Map(inital_count, map_size, map_size, current_species)
+            the_map = source.map.Map(inital_count, map_size, map_size, current_species)
             tested_species[len(results)] = np.concatenate(current_species[:, [1, 5, 6, 7, 10]])
             for iteration in range(max_iterations):
                 if not survival_simulation(the_map, species_count):
-                    results.append([False])
+                    results.append([iteration])
                     break
             else:
-                results.append([True])
+                results.append([max_iterations])
     if len(results) == 0:
         return [], []
     try:
@@ -139,3 +140,20 @@ def survival_tests(file_name,
         pd.DataFrame(data=tested_species, columns=columns).to_csv(file_name, index=False)
     finally:
         return species_count_list, tested_species, results       
+
+
+
+def test_results_to_normalized_labeled_set(data_frame):
+    result = source.random_forest.LabeledSet(len(data_frame[data_frame.columns]) - 1)
+    input_array = np.array(data_frame[data_frame.columns[:-1]])
+    for column in range(input_array.shape[1]):
+        input_array[:, column] = (
+                                     (input_array[:, column] - input_array[:, column].min())
+                                     / (input_array[:, column].max() - input_array[:, column].min())
+                                 )
+    labels = np.array(data_frame["result"])
+    for i in range(input_array.shape[0]):
+        result.add_example(input_array[i],
+                           1 if labels[i] == True else -1)
+    return result
+

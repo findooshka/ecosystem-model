@@ -1,4 +1,4 @@
-from being import Being
+import source.being
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -44,9 +44,9 @@ class Map:
                     np.random.rand() * self.beings_map.shape[1]))
         else:
             position = position.copy()
-        being = Being(species,
-                      position,
-                      self.beings_map.shape)
+        being = source.being.Being(species,
+                                   position,
+                                   self.beings_map.shape)
         if (len(self.free_indexes_set) == 0):
             being.set_position_in_list(len(self.beings_list))
             self.beings_list.append(being)
