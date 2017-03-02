@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+%matplotlib inline
 from math import log, sqrt
 import random
 
@@ -176,7 +177,7 @@ class DecisionTree(Classifier):
         positive_count, negative_count = self.count_results(data_set)
         return self.entropy(positive_count, negative_count)
     
-    def variance(self, data_set):  # pour la regression
+    def variance(self, data_set):
         return data_set.y.var() * data_set.size()
         
     ##################
@@ -378,3 +379,83 @@ class RandomForest(Classifier):
         for i in range(self.tree_count):
             results.append(self.trees[i].predict(x[self.trees_dimensions[i]], find_index=True))
         return np.array(results)
+
+
+class GradientBoost(Classifier):
+    class ConstantClassifier(Classifier):
+        def __init__(self):
+            pass
+        
+        def train(self, training_set):
+            self.result = training_set.y.mean()
+            
+        def predict(self, x):
+            return self.result
+    
+    def __init__(self,
+                 BaseClassifier):
+        self.BaseClassifier = BaseClassifier
+    
+    def predict(self, x):
+        return 1 if self.coefficients.dot([self.classifiers[i].predict(x) for i in range(len(self.classifiers))]) > 0.1 else -1
+    
+    def limited_prediction(self, x):  # utilisée pendant l'apprentissage
+        return self.coefficients[:len(self.classifiers) - 1].dot([self.classifiers[i].predict(x) for i in range(len(self.classifiers) - 1)])
+    
+    def get_pseudo_residuals(self, loss_function_derivative, training_set):
+        result = LabeledSet(training_set.x.shape[1])
+        for example_index in range(training_set.size()):
+            result.add_example(
+                training_set.get_x(example_index),
+                (-loss_function_derivative(self.limited_prediction(training_set.get_x(example_index)),
+                                          training_set.get_y(example_index)))
+            )
+        return result
+            
+    def coefficient_gradient_descent(self,
+                                     training_set,
+                                     coefficient_index,
+                                     loss_function_derivative,
+                                     learning_rate,
+                                     learn_threshold):
+        difference = learn_threshold + 0.1
+        classifier_prediction = 0.0
+        previous_model_prediction = 0.0
+        while abs(difference) > learn_threshold:
+            self.coefficients[coefficient_index] += difference
+            difference = 0.0
+            for example_index in range(training_set.size()):
+                previous_model_prediction = self.limited_prediction(training_set.get_x(example_index))
+                classifier_prediction = self.classifiers[-1].predict(training_set.get_x(example_index))
+                difference -= (learning_rate
+                               * self.classifiers[-1].predict(training_set.get_x(example_index))
+                               * loss_function_derivative(classifier_prediction * self.coefficients[coefficient_index]
+                                                          + previous_model_prediction,
+                                                          training_set.get_y(example_index)))
+    
+    def train(self,
+              training_set,
+              learning_rate,
+              learn_threshold,
+              classifier_train_kwargs,
+              classifier_init_args,
+              classifier_init_kwargs,
+              loss_function_derivative,  # d(L(ŷ, y)) / d(ŷ)
+              iteration_count,
+              verbose=False):
+        self.classifiers = [self.ConstantClassifier()]
+        self.classifiers[0].train(training_set)
+        self.coefficients = np.zeros(iteration_count)
+        self.coefficients[0] = 1
+        for iteration in range(1, iteration_count):
+            if verbose:
+                print("Started iteration " + str(iteration))
+            self.classifiers.append(self.BaseClassifier(*classifier_init_args, **classifier_init_kwargs))
+            current_training_set = self.get_pseudo_residuals(loss_function_derivative, training_set)
+            self.classifiers[-1].train(current_training_set, **classifier_train_kwargs)
+            if verbose:
+                print("Basic classifier trained")
+            self.coefficient_gradient_descent(training_set, iteration, loss_function_derivative, learning_rate, learn_threshold)
+        if verbose:
+            print("Finished training")
+                

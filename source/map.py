@@ -131,7 +131,7 @@ class Map:
         being.is_dead = True
     
     def eat(self, being, prey):
-        being.satiation += prey.satiation / 2
+        being.satiation += prey.satiation
         self.delete_being(prey)
     
     def find_and_eat(self, being):

@@ -92,9 +92,9 @@ def survival_tests(file_name,
     species_count_list = []
     species_count = 0
     for test_number in range(test_count):
-        #if stop_hour != None and time.localtime().tm_hour == stop_hour:
-        #    tested_species = tested_species[:len(results)]
-        #    break
+        if stop_hour != None and time.localtime().tm_hour == stop_hour:
+            tested_species = tested_species[:len(results)]
+            break
         current_species = np.array(species.copy())
         if change_satiation_threshold:
             current_species[:, 7] *= (0.5 + 2 * np.random.rand(current_species.shape[0]))
@@ -122,7 +122,7 @@ def survival_tests(file_name,
             else:
                 results.append([max_iterations])
     if len(results) == 0:
-        return None
+        return [], []
     try:
         tested_species = np.hstack((species_count_list, tested_species, results))
         columns = []
@@ -137,14 +137,13 @@ def survival_tests(file_name,
                 "species " + str(current_species) + " hunt range",            
             ]
         columns.append("result")
-        return pd.DataFrame(data=tested_species, columns=columns)
-    except Exception as err:
-        print('failed testing with error:', err)
-        return None      
+        pd.DataFrame(data=tested_species, columns=columns).to_csv(file_name, index=False)
+    finally:
+        return species_count_list, tested_species, results       
 
 
 
-def test_results_to_normalized_labeled_set(data_frame, threshold):
+def test_results_to_normalized_labeled_set(data_frame):
     result = source.random_forest.LabeledSet(len(data_frame[data_frame.columns]) - 1)
     input_array = np.array(data_frame[data_frame.columns[:-1]])
     for column in range(input_array.shape[1]):
@@ -155,6 +154,6 @@ def test_results_to_normalized_labeled_set(data_frame, threshold):
     labels = np.array(data_frame["result"])
     for i in range(input_array.shape[0]):
         result.add_example(input_array[i],
-                           1 if labels[i] >= threshold else -1)
+                           1 if labels[i] == True else -1)
     return result
 
