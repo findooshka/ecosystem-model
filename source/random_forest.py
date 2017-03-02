@@ -137,7 +137,8 @@ class DecisionTree(Classifier):
             index = self.right.set_leaf_index(index)
             return index
     
-    def __init__(self, leaf_threshold, metrics="Shannon"):
+    def __init__(self, leaf_threshold, metrics="Shannon", vertex_possible_dimensions=-1):
+        self.vertex_possible_dimensions = vertex_possible_dimensions
         self.leaf_threshold = leaf_threshold
         if metrics != "Shannon" and metrics != "Gini" and metrics != "Variance":
             raise ValueError("Unrecognized metrics: " + metrics)
@@ -260,6 +261,11 @@ class DecisionTree(Classifier):
             current_min_metrics = self.variance(current_set)
         current_min_dimension = -1
         current_min_separator = -1
+        dimensions = []
+        if self.vertex_possible_dimensions == -1:
+            dimensions = range(self.input_dimension)
+        else:
+            dimensions = random.sample(range(self.input_dimension), self.vertex_possible_dimensions)
         for dimension in range(self.input_dimension):
             if self.metrics == "Shannon" or self.metrics == "Gini":
                 (
@@ -287,7 +293,7 @@ class DecisionTree(Classifier):
         if self.metrics == "Variance":
             leaf.set_label(current_set.y.mean())
             return
-        leaf.set_label(1 if current_set.y.mean() > 0 else 0)
+        leaf.set_label(1 if current_set.y.mean() > 0 else -1)
                     
     def recurrent_train(self, current_set, current_vertex, current_depth):
         if (self.metrics == "Shannon" and self.measure_set_entropy(current_set) <= self.leaf_threshold
@@ -333,12 +339,12 @@ class RandomForest(Classifier):
     def predict(self, x):
         positive_trees_count = 0
         for i in range(self.tree_count):
-            if self.trees[i].predict(x[self.trees_dimensions[i]]) == 1:
+            if self.trees[i].predict(x) == 1:#[self.trees_dimensions[i]]) == 1:
                 positive_trees_count += 1
         return 1 if positive_trees_count > self.tree_count / 2 else -1
 
     def get_tree_input_dimesion(self, forest_input_dimension):
-        return min(int(sqrt(forest_input_dimension)) + 2, forest_input_dimension)
+        return max(forest_input_dimension, 1)
 
     def train(self, labeled_set, max_depth=-1, verbose=False):
         if labeled_set.size() == 0:
@@ -346,22 +352,24 @@ class RandomForest(Classifier):
         self.input_dimension = labeled_set.x.shape[1]
         self.tree_input_dimesion = self.get_tree_input_dimesion(self.input_dimension)
         self.trees = []
-        self.trees_dimensions = np.zeros((
-                                             self.tree_count,
-                                             self.tree_input_dimesion,
-                                         )).astype(int)
+        #self.trees_dimensions = np.zeros((
+        #                                     self.tree_count,
+        #                                     self.tree_input_dimesion,
+        #                                 )).astype(int)
         chosen_example_index = 0
         for i in range(self.tree_count):
-            self.trees.append(DecisionTree(0.0, metrics=self.tree_metrics))
-            self.trees_dimensions[i] = sorted(random.sample(range(self.input_dimension),
-                                                     self.tree_input_dimesion))
+            self.trees.append(DecisionTree(0.0,
+                                           metrics=self.tree_metrics,
+                                           vertex_possible_dimensions=self.tree_input_dimesion))
+            #self.trees_dimensions[i] = sorted(random.sample(range(self.input_dimension),
+            #                                         self.tree_input_dimesion))
             training_subset = LabeledSet(self.tree_input_dimesion)
             for j in range(labeled_set.size()):
                 chosen_example_index = np.random.randint(labeled_set.size())
                 training_subset.add_example(
-                        labeled_set.get_x(chosen_example_index)[self.trees_dimensions[i]],
-                        labeled_set.get_y(chosen_example_index)
-                    )
+                    labeled_set.get_x(chosen_example_index) ,
+                    labeled_set.get_y(chosen_example_index)
+                )
             self.trees[i].train(training_subset, max_depth=max_depth)
             if verbose:
                 print("trees trained:", (i + 1), "/", self.tree_count)

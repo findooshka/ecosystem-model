@@ -27,8 +27,12 @@ class Being:
             self.hunger_threshold,
             self.direction_change_probability,
             self.random_movement_portion,
-            self.prey_search_range
+            self.prey_search_range,
+            self.decease_rate,
+            self.decease_death_rate,
+            self.decease_recovery_rate,
         ) = species
+        self.ill = False
         self.reproduction_current_cooldown = np.random.rand() * self.reproduction_cooldown
         self.set_position(position, map_shape)
         self.current_direction = self.move_range * (np.random.rand(2) - 1/2)
@@ -107,6 +111,9 @@ class Being:
                        self.direction_change_probability,
                        self.random_movement_portion,
                        self.prey_search_range,
+                       self.decease_rate,
+                       self.decease_death_rate,
+                       self.decease_recovery_rate,
                    )
         else:
             return (
@@ -121,6 +128,9 @@ class Being:
                        self.direction_change_probability,
                        self.random_movement_portion,
                        self.prey_search_range,
+                       self.decease_rate,
+                       self.decease_death_rate,
+                       self.decease_recovery_rate,
                    )
 
 

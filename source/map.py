@@ -24,9 +24,11 @@ d'origine coin supérieur gauche : (i,j)
 """
 
 class Map:
-    def __init__(self, beings_count, width, height, species_list):
+    def __init__(self, beings_count, width, height, species_list, decease_spread_range=1):
         """
         """
+        self.stats = {"died_of_illness": 0, "died_of_hunger": 0, "eaten": 0, "born": 0, "plants_grown": 0}
+        self.decease_spread_range = decease_spread_range
         self.plant_count_map = np.zeros((width, height))
         self.beings_map = np.zeros((width, height)).astype(set)
         for i in range(width):
@@ -64,6 +66,32 @@ class Map:
         self.beings_map[being.get_int_position()].add(being.get_position_in_list())
         if being.is_plant():
             self.plant_count_map[being.get_int_position()] += 1
+
+    def decease_iteration(self, being):
+        if being.decease_rate == 0:
+            return False
+        roll = np.random.rand()
+        if roll < being.decease_rate ** 2:
+            being.ill = True
+        if being.ill:
+            roll = np.random.rand()
+            if roll < being.decease_death_rate:
+                self.delete_being(being)
+                self.stats["died_of_illness"] += 1
+                return True
+            if roll > 1 - being.decease_recovery_rate:
+                being.ill = False
+                being.decease_rate /= 2
+                return False
+        for i in range(-self.decease_spread_range, self.decease_spread_range + 1):
+            for j in range(-self.decease_spread_range, self.decease_spread_range + 1):
+                for being_index in self.beings_map[being.modify_position((i, j), self.beings_map.shape, change_position=False)]:
+                    roll = np.random.rand()
+                    if self.beings_list[being_index].ill:
+                        if roll < being.decease_rate:
+                            being.ill = True
+                            return False
+        return False
         
     def move_being(self, being, roam=True, angle=0):
         if roam:
@@ -122,17 +150,17 @@ class Map:
                         self.move_being(being, roam=False, angle=angle)
                         return True
         return False
-                        
-        
-        
+                
     def delete_being(self, being):
         self.remove_being_from_map(being)
         self.free_indexes_set.add(being.get_position_in_list())
         being.is_dead = True
     
     def eat(self, being, prey):
-        being.satiation += prey.satiation
+        being.satiation += 2 * prey.satiation / 3
         self.delete_being(prey)
+        if not being.is_plant():
+            self.stats["eaten"] += 1
     
     def find_and_eat(self, being):
         for i in range(-1, 2):
@@ -152,7 +180,9 @@ class Map:
         being.satiation /= 2
         if being.is_plant():
             self.create_being(being.get_species(), True)
+            self.stats["plants_grown"] += 1
         else:
+            self.stats["born"] += 1
             position = being.get_position() + np.random.rand(2) - 0.5
             self.create_being(being.get_species(), False, position=position)
     
@@ -163,7 +193,10 @@ class Map:
             being.satiation += max(1 / self.plant_count_map[being.get_int_position()] - 0.3, 0)
         else:
             being.satiation -= 1
+            if self.decease_iteration(being):
+                return
         if (being.satiation <= 0):
+            self.stats["died_of_hunger"] += 1
             self.delete_being(being)
             return
         if (being.satiation < being.hunger_threshold and not being.is_plant()):
