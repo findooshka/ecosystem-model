@@ -36,3 +36,13 @@ Ce que l'ont veux faire lors de cette séance et des prochaines:
 
 
 Lors de cette séance nous avons décidé que ce soir chez nous, nous ferions tourner nos machines avec différents paramètres afin d'afficher les courbes pour trouver les meilleures combinaisons de paramètres possibles. Pour cela nous sommes en train de préparer des fonction de variation des paramètres que nous allons utiliser lors de la nuit. Ceci est le point de notre projet que nous voulons finaliser en prioritée.
+
+## Semaine 2 :
+ *(séance du 02/03/2017)*
+ 
+ Pour cette séance/semaine nous avons :
+ * ajouté une fonction qui fait les meusures (measurement.py)
+ * implementé des algorithmes pour trouver des bonnes parametres initiales
+ * trouvé un article qui traite le même sujet que notre projet d'ARE
+ 
+On continue de faire les tests selon les paramètres afin d'affiner/trouvrer les paramètres idéal pour obtenir un ecosytème stable.
