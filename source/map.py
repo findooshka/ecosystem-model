@@ -27,7 +27,11 @@ class Map:
     def __init__(self, beings_count, width, height, species_list, decease_spread_range=1):
         """
         """
-        self.stats = {"died_of_illness": 0, "died_of_hunger": 0, "eaten": 0, "born": 0, "plants_grown": 0}
+        self.stats = {"died_of_illness": np.zeros(len(beings_count)),
+                      "died_of_hunger": np.zeros(len(beings_count)),
+                      "eaten": np.zeros(len(beings_count)),
+                      "born": np.zeros(len(beings_count)),
+                      "died_of_old_age": np.zeros(len(beings_count)),}
         self.decease_spread_range = decease_spread_range
         self.plant_count_map = np.zeros((width, height))
         self.beings_map = np.zeros((width, height)).astype(set)
@@ -77,7 +81,7 @@ class Map:
             roll = np.random.rand()
             if roll < being.decease_death_rate:
                 self.delete_being(being)
-                self.stats["died_of_illness"] += 1
+                self.stats["died_of_illness"][being.type_id] += 1
                 return True
             if roll > 1 - being.decease_recovery_rate:
                 being.ill = False
@@ -138,6 +142,10 @@ class Map:
             yield current_cell_position, (radius, -i)
         
     def move_towards_prey(self, being):
+        """
+        being -> bool
+        Fonction de chasse pour les predateurs
+        """
         if being.prey_search_range <= 1:
             return False
         for radius in range(1, being.prey_search_range + 1):
@@ -152,15 +160,26 @@ class Map:
         return False
                 
     def delete_being(self, being):
+        """
+        Lorsqu'un individu meurt, 
+        il est rétiré de la map, 
+        sa position dans la liste des individus est ajouté à l'ensemble,
+        et change son état à mort.
+        """
         self.remove_being_from_map(being)
         self.free_indexes_set.add(being.get_position_in_list())
         being.is_dead = True
     
     def eat(self, being, prey):
-        being.satiation += 3 * prey.satiation / 4
+        """
+        lorsqu'un individu mange une proie, il ingurgite la moitié de son niveau de satiation.
+        La moitié est arbitraire ici. On ne prend que la moitié pour éviter une croissance trop importante des espèces prédateurs.
+        On <delete_being> la proie
+        """
+        being.satiation += prey.satiation
         self.delete_being(prey)
         if not being.is_plant():
-            self.stats["eaten"] += 1
+            self.stats["eaten"][prey.type_id] += 1
     
     def find_and_eat(self, being):
         for i in range(-1, 2):
@@ -178,15 +197,22 @@ class Map:
     def reproduction(self, being):
         being.reproduction_current_cooldown = being.reproduction_cooldown * (np.random.rand() + 0.5)
         being.satiation /= 2
+        self.stats["born"][being.type_id] += 1
         if being.is_plant():
             self.create_being(being.get_species(), True)
-            self.stats["plants_grown"] += 1
         else:
-            self.stats["born"] += 1
             position = being.get_position() + np.random.rand(2) - 0.5
             self.create_being(being.get_species(), False, position=position)
     
     def iterate_being(self, being):
+        """
+        Fonction qui itère un individu de l'état n à l'état n+1.
+        """
+        being.age += 1
+        if being.age >= being.life_duration:
+            self.stats["died_of_old_age"][being.type_id] += 1
+            self.delete_being(being)
+            return
         if being.reproduction_current_cooldown > 0:
             being.reproduction_current_cooldown -= 1
         if being.is_plant():
@@ -196,7 +222,7 @@ class Map:
             if self.decease_iteration(being):
                 return
         if (being.satiation <= 0):
-            self.stats["died_of_hunger"] += 1
+            self.stats["died_of_hunger"][being.type_id] += 1
             self.delete_being(being)
             return
         if (being.satiation < being.hunger_threshold and not being.is_plant()):
@@ -212,6 +238,9 @@ class Map:
             self.move_being(being)
 
     def iteration(self):
+        """
+        Fonction qui fait l'itération sur l'ensembles des invidivus
+        """
         for being in self.beings_list:
             if not being.is_dead:
                 self.iterate_being(being)

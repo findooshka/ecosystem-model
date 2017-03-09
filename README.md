@@ -44,5 +44,16 @@ Lors de cette séance nous avons décidé que ce soir chez nous, nous ferions to
  * ajouté une fonction qui fait les meusures (measurement.py)
  * implementé des algorithmes pour trouver des bonnes parametres initiales
  * trouvé un article qui traite le même sujet que notre projet d'ARE
+ * Commentaires du code
  
 On continue de faire les tests selon les paramètres afin d'affiner/trouvrer les paramètres idéal pour obtenir un ecosytème stable.
+
+
+## Semaine 3 :
+ *(séance du 09/03/2017)*
+ 
+ Ce qui est ajouté :
+ * Fonctionnalité de maladie
+ * Fonctionnalité de mort de veilliesse 
+ * Fonctionnalité de list de statistique d'une simulation
+ * Commentaires du code

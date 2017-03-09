@@ -31,7 +31,10 @@ class Being:
             self.decease_rate,
             self.decease_death_rate,
             self.decease_recovery_rate,
+            self.life_duration,
         ) = species
+        self.life_duration *= 0.5 + np.random.rand()
+        self.age = 0
         self.ill = False
         self.reproduction_current_cooldown = np.random.rand() * self.reproduction_cooldown
         self.set_position(position, map_shape)
@@ -114,6 +117,7 @@ class Being:
                        self.decease_rate,
                        self.decease_death_rate,
                        self.decease_recovery_rate,
+                       self.life_duration,
                    )
         else:
             return (
@@ -131,6 +135,7 @@ class Being:
                        self.decease_rate,
                        self.decease_death_rate,
                        self.decease_recovery_rate,
+                       self.life_duration,
                    )
 
 

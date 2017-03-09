@@ -4,9 +4,13 @@ import numpy as np
 import time
 from math import pi, cos, sin, acos, sqrt
 import source.map
-import source.random_forest
+import source.basic_classes
 
 def get_population(beings_list):
+    """
+    list[being] -> set(int)
+    Compte le nombre total d'individu pour chaque espèce dans un ensemble.
+    """
     result = {}
     for being in beings_list:
         if being.is_dead:
@@ -64,6 +68,11 @@ def draw_population(global_map,
 
 
 def survival_simulation(the_map, species_count):
+    """
+    Map*int -> bool
+    Faire une iteration et vérifie si l'on a ou non le bon nombre d'espèce au départ.
+    True si c'est le cas, False sinon    
+    """
     the_map.iteration()
     if len(get_population(the_map.beings_list)) < species_count:
         return False
@@ -145,7 +154,7 @@ def survival_tests(file_name,
 
 
 def test_results_to_normalized_labeled_set(data_frame, threshold):
-    result = source.random_forest.LabeledSet(len(data_frame[data_frame.columns]) - 1)
+    result = source.basic_classes.LabeledSet(len(data_frame[data_frame.columns]) - 1)
     input_array = np.array(data_frame[data_frame.columns[:-1]])
     for column in range(input_array.shape[1]):
         input_array[:, column] = (
