@@ -157,7 +157,7 @@ class Map:
         being.is_dead = True
     
     def eat(self, being, prey):
-        being.satiation += 2 * prey.satiation / 3
+        being.satiation += 3 * prey.satiation / 4
         self.delete_being(prey)
         if not being.is_plant():
             self.stats["eaten"] += 1
