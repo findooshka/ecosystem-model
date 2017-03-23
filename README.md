@@ -57,3 +57,13 @@ On continue de faire les tests selon les paramètres afin d'affiner/trouvrer les
  * Fonctionnalité de mort de veilliesse 
  * Fonctionnalité de list de statistique d'une simulation
  * Commentaires du code
+ 
+
+## Semaine 4 :
+ *(séance du 16/03/2017)*
+ 
+ Graphe de dépendance entre deux populations :
+ 
+![deux_populations](https://github.com/findooshka/ecosystem-model/blob/master/graphics/2-especes-maladie--0.04-50-50.png)
+
+ On fait des tests en variant plusieurs paramètres. On observe que les fonctionnalités de maladie et de mort de veilliesse permettent d´obtenir un système plus stable.

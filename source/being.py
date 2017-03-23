@@ -33,6 +33,7 @@ class Being:
             self.decease_recovery_rate,
             self.life_duration,
         ) = species
+        self.current_decease_rate = self.decease_rate
         self.life_duration *= 0.5 + np.random.rand()
         self.age = 0
         self.ill = False

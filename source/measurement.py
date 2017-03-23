@@ -66,6 +66,33 @@ def draw_population(global_map,
         subplot.semilogy(plots[type])
     plt.show()
 
+def scatter_populations(species1,
+                        species2,
+                        global_map,
+                        iteration_number,
+                        iterations_per_point,
+                        color_start=(0.5, 0, 0),
+                        color_end=(0, 0.6, 0)):
+    color_start = np.array(color_start)
+    color_end = np.array(color_end)
+    species1_population = []
+    species2_population = []
+    colors = []
+    for current_iteration_number in range(iterations_per_point * iteration_number):
+        global_map.iteration()
+        if current_iteration_number % iterations_per_point == 0:
+            population = get_population(global_map.beings_list)
+            if not species1 in population or not species2 in population:
+                break
+            species1_population.append(population[species1])
+            species2_population.append(population[species2])
+            colors.append(color_start
+                          + (color_end - color_start) * (current_iteration_number) / (iterations_per_point * iteration_number))
+    plt.close('all')
+    plt.plot(species1_population, species2_population, linewidth=1, alpha=0.5)
+    plt.scatter(species1_population, species2_population, c=colors, s=10)
+    plt.show()
+    return species1_population, species2_population
 
 def survival_simulation(the_map, species_count):
     """
@@ -150,8 +177,6 @@ def survival_tests(file_name,
     except Exception as err:
         print('failed testing with error:', err)
         return None      
-
-
 
 def test_results_to_normalized_labeled_set(data_frame, threshold):
     result = source.basic_classes.LabeledSet(len(data_frame[data_frame.columns]) - 1)

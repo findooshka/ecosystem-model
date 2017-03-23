@@ -24,7 +24,14 @@ d'origine coin supérieur gauche : (i,j)
 """
 
 class Map:
-    def __init__(self, beings_count, width, height, species_list, decease_spread_range=1):
+    def __init__(self,
+                 beings_count,
+                 width,
+                 height,
+                 species_list,
+                 species_spawn_position_type,
+                 gaussian_variance_multiplier=0.1,
+                 decease_spread_range=1):
         """
         """
         self.stats = {"died_of_illness": np.zeros(len(beings_count)),
@@ -40,9 +47,17 @@ class Map:
                 self.beings_map[i, j] = set()
         self.beings_list = []
         self.free_indexes_set = set()
+        start_positions = []
+        for i in range(len(beings_count)):
+            if species_spawn_position_type[i] == "gaussian":
+                start_positions.append(np.random.multivariate_normal(np.random.rand(2) * np.array((width, height)),
+                                                                     (width + height) * gaussian_variance_multiplier * np.identity(2),
+                                                                     beings_count[i]))
+            if species_spawn_position_type[i] == "random":
+                start_positions.append(np.random.rand(beings_count[i], 2) * (width, height))                
         for i in range(len(beings_count)):
             for j in range(beings_count[i]):
-                self.create_being(species_list[i], True)
+                self.create_being(species_list[i], False, start_positions[i][j])
                 
     def create_being(self, species, random_position, position=None):
         if random_position:
@@ -72,10 +87,10 @@ class Map:
             self.plant_count_map[being.get_int_position()] += 1
 
     def decease_iteration(self, being):
-        if being.decease_rate == 0:
+        if being.current_decease_rate == 0:
             return False
         roll = np.random.rand()
-        if roll < being.decease_rate ** 2:
+        if roll < being.current_decease_rate ** 2:
             being.ill = True
         if being.ill:
             roll = np.random.rand()
@@ -85,14 +100,14 @@ class Map:
                 return True
             if roll > 1 - being.decease_recovery_rate:
                 being.ill = False
-                being.decease_rate /= 2
+                being.current_decease_rate /= 2
                 return False
         for i in range(-self.decease_spread_range, self.decease_spread_range + 1):
             for j in range(-self.decease_spread_range, self.decease_spread_range + 1):
                 for being_index in self.beings_map[being.modify_position((i, j), self.beings_map.shape, change_position=False)]:
                     roll = np.random.rand()
                     if self.beings_list[being_index].ill:
-                        if roll < being.decease_rate:
+                        if roll < being.current_decease_rate:
                             being.ill = True
                             return False
         return False
