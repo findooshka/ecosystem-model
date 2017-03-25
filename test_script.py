@@ -38,7 +38,6 @@ def initialize_map():
 
 def make_one_test(map_size,
                   max_iterations,
-                  test_count,
                   inital_beings_number_bounds,
                   simulations_per_test=1,
                   change_satiation_threshold=True,
@@ -93,9 +92,8 @@ def main():
     print('Started scripterino')
     while True:
         test = make_one_test(50,
-                            max_iterations=10,
-                            test_count=10000,
-                            inital_beings_number_bounds=[(50, 400), (2, 10), (1000, 6000)],
+                            max_iterations=6000,
+                            inital_beings_number_bounds=[(50, 400), (6, 20), (5000, 10000)],
                             simulations_per_test=1)
         tests_df = tests_df.append(test, ignore_index=True)
         test_count += 1
